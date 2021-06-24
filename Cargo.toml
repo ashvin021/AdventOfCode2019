@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 native-tls = "0.2.7"
+itertools = "0.10.1"
