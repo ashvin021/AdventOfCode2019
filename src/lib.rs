@@ -1,3 +1,9 @@
+#[macro_use]
+extern crate enum_primitive_derive;
+extern crate num_traits;
+
+pub mod intcode;
+
 use std::{
     fs::{self, File},
     io::{self, BufRead, BufReader, Seek, Write},

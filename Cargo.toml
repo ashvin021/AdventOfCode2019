@@ -9,3 +9,5 @@ edition = "2018"
 [dependencies]
 native-tls = "0.2.7"
 itertools = "0.10.1"
+enum-primitive-derive = "^0.2"
+num-traits = "^0.1"
