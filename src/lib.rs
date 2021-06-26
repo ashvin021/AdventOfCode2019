@@ -16,6 +16,8 @@ use native_tls::TlsConnector;
 #[macro_export]
 macro_rules! timed_main {
     ($a:expr, $($body:tt)+) => {
+    use num_format::{Locale, ToFormattedString};
+
         fn main() {
             let start = std::time::Instant::now();
             for i in 0..$a {
@@ -26,9 +28,10 @@ macro_rules! timed_main {
                     println!("Part 2 answer: {}", p2);
                 }
             }
-            let time = start.elapsed().as_millis();
-            println!("Total time for {} iterations: {}ms", $a, time);
-            println!("Average time for {} iterations: {}ms", $a, time / $a);
+            let time = start.elapsed().as_nanos();
+            let locale = Locale::en_GB;
+            println!("Total time for {} iterations: {}ns", $a, time.to_formatted_string(&locale));
+            println!("Average time for {} iterations: {}ns", $a, (time / $a).to_formatted_string(&locale));
         }
     };
 }
