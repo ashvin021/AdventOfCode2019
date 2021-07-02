@@ -12,6 +12,10 @@ pub enum IntcodeOpcode {
     Mult = 2,
     Input = 3,
     Output = 4,
+    JumpEq = 5,
+    JumpNeq = 6,
+    LessThan = 7,
+    Equals = 8,
     Halt = 99,
 }
 
@@ -49,12 +53,30 @@ impl IntcodeComputer {
             IntcodeOpcode::Mult => {
                 self.mem[indices[2]] = self.mem[indices[0]] * self.mem[indices[1]];
             }
-            IntcodeOpcode::Halt => return false,
             IntcodeOpcode::Input => {
                 println!("Input: ");
                 self.mem[indices[0]] = IntcodeComputer::read_line();
             }
-            IntcodeOpcode::Output => println!("Output: {}", indices[0]),
+            IntcodeOpcode::Output => println!("Output ({}): {}", i, self.mem[indices[0]]),
+            IntcodeOpcode::JumpEq => {
+                if self.mem[indices[0]] != 0 {
+                    self.instr_ptr = self.mem[indices[1]] as usize;
+                    return true;
+                }
+            }
+            IntcodeOpcode::JumpNeq => {
+                if self.mem[indices[0]] == 0 {
+                    self.instr_ptr = self.mem[indices[1]] as usize;
+                    return true;
+                }
+            }
+            IntcodeOpcode::LessThan => {
+                self.mem[indices[2]] = (self.mem[indices[0]] < self.mem[indices[1]]) as i32;
+            }
+            IntcodeOpcode::Equals => {
+                self.mem[indices[2]] = (self.mem[indices[0]] == self.mem[indices[1]]) as i32;
+            }
+            IntcodeOpcode::Halt => return false,
         };
 
         // Increment instruction pointer
@@ -86,7 +108,10 @@ impl IntcodeComputer {
         let mut buf = String::new();
         std::io::stdin()
             .read_line(&mut buf)
-            .map(|_| buf.parse::<i32>())
+            .map(|_| {
+                buf.pop();
+                buf.parse::<i32>()
+            })
             .unwrap()
             .expect("invalid input to Input instruction")
     }
@@ -95,7 +120,11 @@ impl IntcodeComputer {
 impl IntcodeOpcode {
     pub fn num_of_params(&self) -> usize {
         match self {
-            IntcodeOpcode::Add | IntcodeOpcode::Mult => 3,
+            IntcodeOpcode::Add
+            | IntcodeOpcode::Mult
+            | IntcodeOpcode::LessThan
+            | IntcodeOpcode::Equals => 3,
+            IntcodeOpcode::JumpEq | IntcodeOpcode::JumpNeq => 2,
             IntcodeOpcode::Input | IntcodeOpcode::Output => 1,
             IntcodeOpcode::Halt => 0,
         }
