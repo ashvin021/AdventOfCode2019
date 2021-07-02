@@ -1,3 +1,5 @@
+use std::io;
+
 use num_traits::FromPrimitive;
 
 #[derive(Debug)]
@@ -30,19 +32,19 @@ impl IntcodeComputer {
         IntcodeComputer { mem, instr_ptr: 0 }
     }
 
-    pub fn run(self: &mut Self) {
+    pub fn run(&mut self) {
         while self.execute_instruction() {}
     }
 
-    fn execute_instruction(self: &mut Self) -> bool {
+    fn execute_instruction(&mut self) -> bool {
         let i = self.instr_ptr;
 
         // Get opcode and param indexes
         let opcode = IntcodeOpcode::from_i32(self.mem[i] % 100).unwrap();
-        let modes = IntcodeComputer::get_modes(self.mem[i] / 100, &opcode);
+        let modes = Self::get_modes(self.mem[i] / 100, &opcode);
         let indices: Vec<usize> = (i + 1..)
             .zip(modes.iter())
-            .map(|(index, mode)| IntcodeComputer::fetch_param_index(&self.mem, index, mode))
+            .map(|(index, mode)| Self::fetch_param_index(&self.mem, index, mode))
             .collect();
 
         // Perform operation
@@ -55,7 +57,7 @@ impl IntcodeComputer {
             }
             IntcodeOpcode::Input => {
                 println!("Input: ");
-                self.mem[indices[0]] = IntcodeComputer::read_line();
+                self.mem[indices[0]] = Self::read_line();
             }
             IntcodeOpcode::Output => println!("Output ({}): {}", i, self.mem[indices[0]]),
             IntcodeOpcode::JumpEq => {
@@ -84,7 +86,7 @@ impl IntcodeComputer {
         true
     }
 
-    fn fetch_param_index(memory: &Vec<i32>, index: usize, param_mode: &ParamMode) -> usize {
+    fn fetch_param_index(memory: &[i32], index: usize, param_mode: &ParamMode) -> usize {
         match param_mode {
             ParamMode::PositionMode => memory[index] as usize,
             ParamMode::ImmediateMode => index,
@@ -106,7 +108,7 @@ impl IntcodeComputer {
 
     fn read_line() -> i32 {
         let mut buf = String::new();
-        std::io::stdin()
+        io::stdin()
             .read_line(&mut buf)
             .map(|_| {
                 buf.pop();
@@ -120,13 +122,10 @@ impl IntcodeComputer {
 impl IntcodeOpcode {
     pub fn num_of_params(&self) -> usize {
         match self {
-            IntcodeOpcode::Add
-            | IntcodeOpcode::Mult
-            | IntcodeOpcode::LessThan
-            | IntcodeOpcode::Equals => 3,
-            IntcodeOpcode::JumpEq | IntcodeOpcode::JumpNeq => 2,
-            IntcodeOpcode::Input | IntcodeOpcode::Output => 1,
-            IntcodeOpcode::Halt => 0,
+            Self::Add | Self::Mult | Self::LessThan | Self::Equals => 3,
+            Self::JumpEq | Self::JumpNeq => 2,
+            Self::Input | Self::Output => 1,
+            Self::Halt => 0,
         }
     }
 }

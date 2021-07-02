@@ -2,11 +2,11 @@ use itertools::iterate;
 
 use aoc2019::*;
 
-fn part01(input: &Vec<u32>) -> u32 {
+fn part01(input: &[u32]) -> u32 {
     input.iter().map(|x| x / 3 - 2).filter(|&x| x > 0).sum()
 }
 
-fn part02(input: &Vec<u32>) -> u32 {
+fn part02(input: &[u32]) -> u32 {
     let calculate_fuel = |x: &i32| *x / 3 - 2;
     input
         .iter()
@@ -21,7 +21,7 @@ fn part02(input: &Vec<u32>) -> u32 {
 
 fn day_01() -> (u32, u32) {
     let input: Vec<String> = get_input(1).collect();
-    let nums = input.iter().map(|l| l.parse::<u32>().unwrap()).collect();
+    let nums: Vec<u32> = input.iter().map(|l| l.parse::<u32>().unwrap()).collect();
     (part01(&nums), part02(&nums))
 }
 

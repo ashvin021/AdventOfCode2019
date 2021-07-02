@@ -61,7 +61,7 @@ impl FromStr for WireSection {
     }
 }
 
-fn to_segments(path: &Vec<WireSection>) -> (Vec<HorizontalSegment>, Vec<VerticalSegment>) {
+fn to_segments(path: &[WireSection]) -> (Vec<HorizontalSegment>, Vec<VerticalSegment>) {
     let (mut x, mut y) = (0, 0);
     let mut steps: u32 = 0;
 
@@ -106,8 +106,8 @@ fn to_segments(path: &Vec<WireSection>) -> (Vec<HorizontalSegment>, Vec<Vertical
 fn intersect_segments(h: &HorizontalSegment, v: &VerticalSegment) -> Option<i32> {
     let mut xs = [h.x1, h.x2];
     let mut ys = [v.y1, v.y2];
-    xs.sort();
-    ys.sort();
+    xs.sort_unstable();
+    ys.sort_unstable();
 
     if (xs[0]..=xs[1]).contains(&v.x) && (ys[0]..=ys[1]).contains(&h.y) {
         Some(v.x + h.y)
@@ -119,8 +119,8 @@ fn intersect_segments(h: &HorizontalSegment, v: &VerticalSegment) -> Option<i32>
 fn intersect_segments_steps(h: &HorizontalSegment, v: &VerticalSegment) -> Option<u32> {
     let mut xs = [h.x1, h.x2];
     let mut ys = [v.y1, v.y2];
-    xs.sort();
-    ys.sort();
+    xs.sort_unstable();
+    ys.sort_unstable();
 
     if (xs[0]..=xs[1]).contains(&v.x) && (ys[0]..=ys[1]).contains(&h.y) {
         let h_steps = h.steps + ((v.x - h.x1).abs() as u32);
@@ -160,9 +160,9 @@ fn day_03() -> (i32, u32) {
     let segments = raw
         .iter()
         .map(|l| {
-            l.split(",")
+            l.split(',')
                 .map(|s| s.parse::<WireSection>().unwrap())
-                .collect()
+                .collect::<Vec<_>>()
         })
         .map(|w| to_segments(&w))
         .collect::<Vec<_>>()

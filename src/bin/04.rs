@@ -16,7 +16,7 @@ fn to_digits(x: &u32) -> Vec<u8> {
     digits
 }
 
-fn digits_never_decrease(digits: &Vec<u8>) -> bool {
+fn digits_never_decrease(digits: &[u8]) -> bool {
     digits
         .iter()
         .fold((0, true), |(prev, never_decrease), curr| {
@@ -25,10 +25,10 @@ fn digits_never_decrease(digits: &Vec<u8>) -> bool {
         .1
 }
 
-fn consecutive_digits(digits: &Vec<u8>) -> Vec<u8> {
+fn consecutive_digits(digits: &[u8]) -> Vec<u8> {
     digits
         .iter()
-        .chain(std::iter::once(&(10 as u8)))
+        .chain(std::iter::once(&10u8))
         .fold(
             (0, 1, Vec::new()),
             |(prev, consecutive, mut consecutives), curr| {
@@ -45,19 +45,19 @@ fn consecutive_digits(digits: &Vec<u8>) -> Vec<u8> {
         .2
 }
 
-fn part01(digits: &Vec<Vec<u8>>) -> u32 {
+fn part01(digits: &[Vec<u8>]) -> u32 {
     digits
         .iter()
-        .filter(|ds| digits_never_decrease(&ds) && any(consecutive_digits(&ds), |d| d >= 2))
+        .filter(|ds| digits_never_decrease(ds) && any(consecutive_digits(ds), |d| d >= 2))
         .count()
         .try_into()
         .unwrap()
 }
 
-fn part02(digits: &Vec<Vec<u8>>) -> u32 {
+fn part02(digits: &[Vec<u8>]) -> u32 {
     digits
         .iter()
-        .filter(|ds| digits_never_decrease(&ds) && any(consecutive_digits(&ds), |d| d == 2))
+        .filter(|ds| digits_never_decrease(ds) && any(consecutive_digits(ds), |d| d == 2))
         .count()
         .try_into()
         .unwrap()
@@ -67,10 +67,12 @@ fn day_04() -> (u32, u32) {
     let nums: Vec<_> = get_input(4)
         .next()
         .unwrap()
-        .split("-")
+        .split('-')
         .map(|s| s.parse::<u32>().unwrap())
         .collect();
-    let digits = (nums[0]..=nums[1]).map(|x| to_digits(&x)).collect();
+    let digits = (nums[0]..=nums[1])
+        .map(|x| to_digits(&x))
+        .collect::<Vec<_>>();
     (part01(&digits), part02(&digits))
 }
 
