@@ -1,11 +1,14 @@
 use std::io;
 
+use crossbeam::channel::{unbounded, Receiver, Sender};
 use num_traits::FromPrimitive;
 
 #[derive(Debug)]
 pub struct IntcodeComputer {
     pub mem: Vec<i32>,
     instr_ptr: usize,
+    incoming: Option<Receiver<i32>>,
+    outgoing: Option<Sender<(i32, i32)>>,
 }
 
 #[derive(Primitive)]
@@ -29,7 +32,27 @@ enum ParamMode {
 
 impl IntcodeComputer {
     pub fn new(mem: Vec<i32>) -> Self {
-        IntcodeComputer { mem, instr_ptr: 0 }
+        IntcodeComputer {
+            mem,
+            instr_ptr: 0,
+            incoming: None,
+            outgoing: None,
+        }
+    }
+
+    pub fn with_io(mem: Vec<i32>) -> (Self, Sender<i32>, Receiver<(i32, i32)>) {
+        let (s_input, r_input) = unbounded();
+        let (s_output, r_output) = unbounded();
+        (
+            IntcodeComputer {
+                mem,
+                instr_ptr: 0,
+                incoming: Some(r_input),
+                outgoing: Some(s_output),
+            },
+            s_input,
+            r_output,
+        )
     }
 
     pub fn run(&mut self) {
@@ -56,10 +79,9 @@ impl IntcodeComputer {
                 self.mem[indices[2]] = self.mem[indices[0]] * self.mem[indices[1]];
             }
             IntcodeOpcode::Input => {
-                println!("Input: ");
-                self.mem[indices[0]] = Self::read_line();
+                self.mem[indices[0]] = self.receive_input();
             }
-            IntcodeOpcode::Output => println!("Output ({}): {}", i, self.mem[indices[0]]),
+            IntcodeOpcode::Output => self.send_output(i as i32, self.mem[indices[0]]),
             IntcodeOpcode::JumpEq => {
                 if self.mem[indices[0]] != 0 {
                     self.instr_ptr = self.mem[indices[1]] as usize;
@@ -116,6 +138,20 @@ impl IntcodeComputer {
             })
             .unwrap()
             .expect("invalid input to Input instruction")
+    }
+
+    fn send_output(&self, index: i32, value: i32) {
+        match &self.outgoing {
+            Some(sender) => sender.send((index, value)).unwrap(),
+            _ => panic!("Can't send output - handlers haven't been configured"),
+        }
+    }
+
+    fn receive_input(&self) -> i32 {
+        match &self.incoming {
+            Some(receiver) => receiver.recv().unwrap(),
+            _ => panic!("Can't receive input - handlers haven't been configured"),
+        }
     }
 }
 
