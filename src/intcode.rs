@@ -11,7 +11,7 @@ use num_traits::{cast::cast, FromPrimitive, Num, NumCast, One, Zero};
 pub struct IntcodeComputer<T: Num> {
     pub mem: Vec<T>,
     instr_ptr: usize,
-    relative_base: usize,
+    relative_base: isize,
     incoming: Option<Receiver<T>>,
     outgoing: Option<Sender<(T, T)>>,
 }
@@ -119,9 +119,7 @@ where
                 self.mem[indices[2]] = (self.mem[indices[0]] == self.mem[indices[1]]).into();
             }
             IntcodeOpcode::RelBase => {
-                self.relative_base = (self.relative_base as isize
-                    + cast::<T, isize>(self.mem[indices[0]]).unwrap())
-                    as usize;
+                self.relative_base += cast::<T, isize>(self.mem[indices[0]]).unwrap();
             }
             IntcodeOpcode::Halt => return Ok(false),
         };
@@ -136,7 +134,7 @@ where
             ParamMode::PositionMode => cast(self.mem[index]).unwrap(),
             ParamMode::ImmediateMode => index,
             ParamMode::RelativeMode => {
-                (self.relative_base as isize + cast::<_, isize>(self.mem[index]).unwrap()) as usize
+                (self.relative_base + cast::<_, isize>(self.mem[index]).unwrap()) as usize
             }
         }
     }
