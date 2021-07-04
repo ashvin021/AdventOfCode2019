@@ -40,7 +40,7 @@ fn part02(mem: &[i32]) -> Result<i32, Box<dyn Error>> {
 
     for settings in (5..=9).permutations(5) {
         let stop = Arc::new(AtomicBool::new(false));
-        let start_amp = |mut amp: IntcodeComputer, stop: &Arc<AtomicBool>| {
+        let start_amp = |mut amp: IntcodeComputer<i32>, stop: &Arc<AtomicBool>| {
             let thread_stop = stop.clone();
             thread::spawn(move || {
                 amp.run();

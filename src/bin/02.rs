@@ -3,7 +3,7 @@ use itertools::Itertools;
 use aoc2019::intcode::*;
 use aoc2019::*;
 
-fn part01(computer: &mut IntcodeComputer) -> i32 {
+fn part01(computer: &mut IntcodeComputer<i32>) -> i32 {
     computer.mem[1] = 12;
     computer.mem[2] = 2;
     computer.run();
