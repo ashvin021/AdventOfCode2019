@@ -27,7 +27,7 @@ fn part02(encoded: &[u8], width: u8, height: u8) -> String {
     let pixels = transpose(layers);
     let decoded: Vec<u8> = pixels
         .iter()
-        .map(|ps| *ps.iter().skip_while(|x| **x == 2).next().unwrap())
+        .map(|ps| *ps.iter().find(|p| **p != 2).unwrap())
         .collect();
 
     for row in decoded.chunks(25) {

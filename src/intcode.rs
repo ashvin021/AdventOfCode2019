@@ -1,11 +1,7 @@
-use std::{
-    convert::{TryFrom, TryInto},
-    fmt::Display,
-    io,
-};
+use std::fmt::Display;
 
 use crossbeam::channel::{unbounded, Receiver, Sender};
-use num_traits::{cast::cast, FromPrimitive, Num, NumCast, One, Zero};
+use num_traits::{cast::cast, FromPrimitive, Num, NumCast, Zero};
 
 #[derive(Debug)]
 pub struct IntcodeComputer<T: Num> {
@@ -32,9 +28,9 @@ pub enum IntcodeOpcode {
 
 #[derive(Primitive)]
 enum ParamMode {
-    PositionMode = 0,
-    ImmediateMode = 1,
-    RelativeMode = 2,
+    Position = 0,
+    Immediate = 1,
+    Relative = 2,
 }
 
 impl<T> IntcodeComputer<T>
@@ -85,7 +81,7 @@ where
         let modes = Self::get_modes(self.mem[i] / 100.into(), &opcode);
         let indices: Vec<usize> = (i + 1..)
             .zip(modes.iter())
-            .map(|(index, mode)| Self::fetch_param_index(&self, index, mode))
+            .map(|(index, mode)| Self::fetch_param_index(self, index, mode))
             .collect();
 
         // Perform operation
@@ -131,9 +127,9 @@ where
 
     fn fetch_param_index(&self, index: usize, param_mode: &ParamMode) -> usize {
         match param_mode {
-            ParamMode::PositionMode => cast(self.mem[index]).unwrap(),
-            ParamMode::ImmediateMode => index,
-            ParamMode::RelativeMode => {
+            ParamMode::Position => cast(self.mem[index]).unwrap(),
+            ParamMode::Immediate => index,
+            ParamMode::Relative => {
                 (self.relative_base + cast::<_, isize>(self.mem[index]).unwrap()) as usize
             }
         }
@@ -150,18 +146,6 @@ where
             .collect();
         modes.reverse();
         modes
-    }
-
-    fn read_line() -> i32 {
-        let mut buf = String::new();
-        io::stdin()
-            .read_line(&mut buf)
-            .map(|_| {
-                buf.pop();
-                buf.parse::<i32>()
-            })
-            .unwrap()
-            .expect("invalid input to Input instruction")
     }
 
     fn send_output(&self, index: T, value: T) {
