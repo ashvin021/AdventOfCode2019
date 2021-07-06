@@ -15,12 +15,29 @@ use native_tls::TlsConnector;
 
 #[macro_export]
 macro_rules! timed_main {
-    ($a:expr, $($body:tt)+) => {
+    ($a: expr, $($body:tt)+) => {
     use num_format::{Locale, ToFormattedString};
 
         fn main() {
+            let args: Vec<String> = std::env::args().collect();
+
+            if args.len() > 2 {
+                println!("Usage: <day> <number of iterations>");
+                std::process::exit(1);
+            }
+
+            let loops = if args.len() == 1 {
+                $a
+            } else if let Ok(num) = args[1].parse::<u128>() {
+                num
+            } else {
+                println!("Invalid number of iterations, continuing with default..");
+                println!("Usage: <day> <number of iterations>");
+                $a
+            };
+
             let start = std::time::Instant::now();
-            for i in 0..$a {
+            for i in 0..loops {
                 let (p1, p2) = { $($body)+ };
 
                 if i == 0 {
@@ -30,8 +47,8 @@ macro_rules! timed_main {
             }
             let time = start.elapsed().as_nanos();
             let locale = Locale::en_GB;
-            println!("Total time for {} iterations: {}ns", $a, time.to_formatted_string(&locale));
-            println!("Average time for {} iterations: {}ns", $a, (time / $a).to_formatted_string(&locale));
+            println!("Total time for {} iterations: {}ns", loops, time.to_formatted_string(&locale));
+            println!("Average time for {} iterations: {}ns", loops, (time / loops).to_formatted_string(&locale));
         }
     };
 }
