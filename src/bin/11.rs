@@ -60,7 +60,7 @@ impl HullPainter {
             },
         );
     }
-    fn run(&mut self, mem: &Vec<i64>) {
+    fn run(&mut self, mem: &[i64]) {
         let stop = Arc::new(AtomicBool::new(false));
 
         // Start running the computer
@@ -96,7 +96,7 @@ impl HullPainter {
     }
 }
 
-fn part01(mem: &Vec<i64>) -> u32 {
+fn part01(mem: &[i64]) -> u32 {
     let mut bot = HullPainter::new();
 
     // Run the intcode instrutions
@@ -106,7 +106,7 @@ fn part01(mem: &Vec<i64>) -> u32 {
     bot.painted_panels.len() as u32
 }
 
-fn part02(mem: &Vec<i64>) -> String {
+fn part02(mem: &[i64]) -> String {
     let mut bot = HullPainter::new();
 
     // Set the start square to white

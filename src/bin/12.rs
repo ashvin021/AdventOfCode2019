@@ -58,7 +58,7 @@ struct MoonSystem {
 }
 
 impl MoonSystem {
-    fn new(start_positions: &Vec<[i32; 3]>) -> Self {
+    fn new(start_positions: &[[i32; 3]]) -> Self {
         let moons = start_positions.iter().map(|p| Moon::new(*p)).collect_vec();
         MoonSystem { moons }
     }
@@ -98,7 +98,7 @@ fn part01(moons: &mut MoonSystem) -> i32 {
 
 fn part02(moons: &mut MoonSystem) -> u64 {
     let mut periods: [u32; 3] = [0; 3];
-    for i in 0..3 {
+    for (i, period) in periods.iter_mut().enumerate() {
         // We use a copy of the system for each iteration
         let mut ms = moons.clone();
 
@@ -108,7 +108,7 @@ fn part02(moons: &mut MoonSystem) -> u64 {
         let mut xs: Vec<(i32, i32)> = Vec::new();
 
         loop {
-            if let Some(_) = prevcounts.get(&xs) {
+            if prevcounts.get(&xs).is_some() {
                 break;
             }
 
@@ -124,9 +124,10 @@ fn part02(moons: &mut MoonSystem) -> u64 {
         }
 
         // Get the difference between the current count and previously seen count
-        periods[i] = count - prevcounts.get(&xs).unwrap();
+        *period = count - prevcounts.get(&xs).unwrap();
     }
 
+    // LCM of the periods for each axis - because they are independent
     lcm(periods.to_vec())
 }
 
@@ -145,8 +146,7 @@ fn day_12() -> (i32, u64) {
         })
         .collect_vec();
 
-    let mut system = MoonSystem::new(&start_positions);
-    let p1 = part01(&mut system);
+    let p1 = part01(&mut MoonSystem::new(&start_positions));
     let p2 = part02(&mut MoonSystem::new(&start_positions));
     (p1, p2)
 }
